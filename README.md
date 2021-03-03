@@ -1,0 +1,2 @@
+# taitotalo_projekti
+Linux-asiantuntijakoulutuksen pakollisen projektin dokumentaatiota
