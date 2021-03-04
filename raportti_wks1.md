@@ -6,7 +6,7 @@ Virtuaalilevyn sijainti: V:\VMBOX\wks1\wks1.vmdk
 
 Kieli yms. asetukset asennuksessa samoin kuin servereiden asennuksessa. Verkkoasetuksiin ei tehdä muuta kuin Host name asetus: `wks1.projekti.local` ja kun verkko laitetaan päälle, kone saa automaattisesti ip-osoitteen DHCPllä. Koska Server01 on DHCP-palvelin, se on oltava käynnissä, jotta DHCP toimii.
 
-**Software selection** osiosta valitaan asennettavaksi **Workstation** ja lisäksi asennetaan **Internet Applications** ja **Office Suite and Productivity**.
+**Software selection** osiosta valitaan asennettavaksi **Workstation** ja lisäksi asennetaan **Office Suite and Productivity**.
 
 Luodaan käyttäjätunnus Jaska Johtajalle ja asetetaan root-käyttäjän salasana. 
 
@@ -16,8 +16,9 @@ Kone ehdottaa kirjautumista Jaska Johtajana, valitaan kuitenkin kirjautumiskent�
 
 Käydään läpi Gnomen asetukset, estetään sijaintitietojen lähettäminen, eikä liitetä tunnusta mihinkään ehdotetuista verkkopalveluista. Kun asetukset on saatu tehtyä ja tervetulotoivotukset suljettua, voidaan avata terminaali-ikkuna. Painetaan ruudun ylälaidasta **Activities** ja avautuvasta valikosta valitaan terminaali (kuvassa toiseksi alin kuvake).
 
+![Activities](images/wks_terminaali.png?raw=true)
 
-## Käyttäjien ja ryhmien luonti
+### Käyttäjien ja ryhmien luonti
 
 Luodaan ryhmät Hallinto ja Myynti käyttäen samoja GID kuin ServerO1 vastaavilla ryhmillä.
 
@@ -33,15 +34,16 @@ usermod -aG Hallinto <ktunnus>
 
 Luodaan käyttäjätunnus Mika Myyjälle:
 ```
-sudo useradd -mc "Mika Myyjä" -G Myynti <ktunnus>
+useradd -mc "Mika Myyjä" -G Myynti <ktunnus>
 ```
 
 Luodaan käyttäjille salasanat esim. `pwmake 16` (luo 16 merkkiä pitkän merkkijonon). Salasanan lisääminen käyttäjätunnukselle:
+
 ```
-sudo passwd <käyttäjätunnus>
+passwd <käyttäjätunnus>
 ```
 
-## Jaettu hakemisto
+### Jaettu hakemisto
 
 Asennetaan `nfs-utils`ja `nfs4-acl-tools`
 ```
@@ -74,12 +76,12 @@ Server01:/shared/Myynti /shared/Myynti nfs defaults 0 0
 
 Lisätään käyttäjien kotihakemistoon linkki osaston hakemistoon:
 ```
-ln -s /shared/<osasto> /home/<käyttäjätunnus>/<osasto>
+sudo -u <käyttäjätunnus> ln -s /shared/<osasto> /home/<käyttäjätunnus>/<osasto>
 ```
 
 Linkkien toimivuus voidaan testata kirjautumalla sisään Jaskan tai Mikan käyttäjätunnuksilla. 
 
-Jaska Johtajan kotihakemistossa näkyy kansio, jonka nimi on hallinto ja joka on linkki jaettuun kansioon.
+Jaska Johtajan kotihakemistossa näkyy kansio, jonka nimi on Hallinto ja joka on linkki jaettuun kansioon.
 
 ![Kotihakemisto](images/hallinto_kansio.png?raw=True)
 
@@ -87,3 +89,11 @@ Jaskan näkymässä `/shared`-hakemistoon, huomataan että `Myynti`-kansion pä�
 
 ![Jaskan shared](images/jaska_shared.png?raw=True)
 
+### SSH-avainten luonti ja kopiointi palvelimelle
+
+Käyttäjät voivat luoda ssh-avaimia itse komennolla `ssh-keygen` ja avain kopioidaan kohteeseen komennolla `ssh-copy-id <käyttäjätunnus>@<kohdekone>`. Luodaan kuitenkin Jaskalle ja Mikalle avaimet käyttövalmiiksi.
+```
+sudo -u <käyttäjätunnus> ssh-keygen
+<vastataan kysymyksiin enterin painamisella>
+```
+Koska avaimen siirrossa pyydetään käyttäjän salasanaa, on parempi, että käyttäjä tekee sen itse ja testaa sen jälkeen avaimen toimivuuden.

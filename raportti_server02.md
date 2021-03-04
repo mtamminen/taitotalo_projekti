@@ -2,9 +2,9 @@
 
 ### Serverin asennus
 
-Virtuaalikoneen sijainti: V:\\VMBox\Server02
+Virtuaalikoneen sijainti isäntäkoneella: V:\\VMBox\Server02
 
-Virtuaalilevyn sijainti: V:\\VMBox\Server02\Server02.vmdk
+Virtuaalilevyn sijainti isäntäkoneella: V:\\VMBox\Server02\Server02.vmdk
 
 Server02 konfigurointi tehdään muuten samoin kuin Server01, verkkokonfiguraatio on seuraavanlainen:
 
@@ -12,19 +12,31 @@ Server02 konfigurointi tehdään muuten samoin kuin Server01, verkkokonfiguraati
 
 Koneen nimeksi ja domainiksi asetetaan: Server02.projekti.local
 
-Root-käyttäjälle asetetaan salasana.
+Levyjä on aluksi vain yksi ja sen partitiointi voidaan tehdä asennusohjelman ehdottamalla tavalla.
 
+Root-käyttäjälle asetetaan salasana ja aloitetaan asennus.
 
-Ennen koneen käynnistämistä lisätään varmuuskopiointia varten toinen 25GB levy.
+Päivitetään kone.
 
-Levyn sijainti koneella: V:\\VMBOX\Server02\Server02-0.vmdk
+Ennen kuin tehdään mitään muuta, lisätään vielä toinen levy varmuuskopioita varten. Koska kopioitavan levyn koko on 20GB, varataan varmuuskopioille varmuuden vuoksi 30GB.
+
+Avataan VMWaren _VM_-valikko ja valitaan sieltä _Settings_. Levyn lisääminen tapahtuu muuten samoin kuin Server01 kanssa tehtiin.
+
+Levyn sijainti isäntäkoneella: V:\\VMBOX\Server02\Server02-0.vmdk
+
+Käynnistetään kone uudelleen: `reboot`.
+
+Listataan levyt ja partitiot komennolla: `parted -l`.
+
+Uusi levy on `/dev/sdb`, joka on osioitava ennen kuin sen voi ottaa käyttöön.
 
 Levylle luodaan koko levyn kokoinen partitio:
 ```
 parted /dev/sdb
 unit GB
 mklabel gpt
-mkpart / <Enter> / <Enter> / 0 / 25 
+mkpart primary 0 30
+print
 quit
 ```
 
@@ -39,12 +51,13 @@ mkdir backups
 mount /dev/sdb1 backups
 ```
 
-## Varmuuskopiointi
-
-Asennetaan koneelle `rdiff-backup`. Kuten työasemalla, täytyy ensin asentaa `epel-release`, minkä jälkeen voidaan asentaa haluttu ohjelma.
+Lisätään vielä levyn mounttaus koneen käynnistyksessä tiedostoon `/etc/fstab`. Ensin täytyy selvittää partition `UUID`: `blkid /dev/sdb1`. Lisätään em. tiedostoon rivi:
 ```
-dnf install -y epel-release
-dnf install -y rdiff-backup
+UUID=4c23b535-a346-4db3-841e-c680ab2c1bdd /backups xfs defaults 0 0
 ```
 
-Tämän jälkeen valmistellan palvelin Server01, josta varmistukset tehdään.
+### Varmuuskopiointi
+
+Palvelimelle on jo valmiiksi asennettu `rsync` ja se riittää.
+
+
